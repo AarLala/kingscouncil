@@ -1,9 +1,8 @@
-
 import { createContext, useContext, useState, useEffect } from "react";
-import { User } from "../types";
+import { supabase } from "../supabaseClient";
 
 interface AuthContextProps {
-  currentUser: User | null;
+  currentUser: any | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, username: string, password: string) => Promise<void>;
@@ -21,87 +20,63 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Simulated user for demo purposes
-  const demoUser: User = {
-    id: "demo-user-001",
-    email: "demo@example.com",
-    username: "ChessBrain",
-    points: 150,
-    completedChallenges: [
-      { id: 1, score: 85, dateCompleted: new Date().toISOString() }
-    ],
-    achievements: [
-      {
-        id: 1,
-        name: "First Challenge",
-        description: "Completed your first challenge",
-        icon: "award",
-        dateUnlocked: new Date().toISOString()
-      }
-    ]
-  };
-
   useEffect(() => {
-    // Check if user is stored in localStorage (simulating persistence)
-    const storedUser = localStorage.getItem("chessUser");
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    // Check for an existing session on mount
+    const getSession = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        setCurrentUser(data.user);
+      } else {
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    };
+    getSession();
+
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
-    try {
-      // This is a mock login. In a real app, you'd verify against a backend
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API call
-      
-      // For demo purposes, we'll log in the demo user
-      setCurrentUser(demoUser);
-      localStorage.setItem("chessUser", JSON.stringify(demoUser));
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    } finally {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.session) {
       setLoading(false);
+      throw new Error(error?.message || "Login failed. Please check your credentials.");
     }
+    setCurrentUser(data.user);
+    setLoading(false);
   };
 
   const signup = async (email: string, username: string, password: string) => {
     setLoading(true);
-    try {
-      // This is a mock signup. In a real app, you'd create a user in your backend
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API call
-      
-      // Create a new user based on the demo user but with the provided email/username
-      const newUser = {
-        ...demoUser,
-        id: `user-${Date.now()}`,
-        email,
-        username,
-        // Reset progress for new user
-        points: 0,
-        completedChallenges: [],
-        achievements: []
-      };
-      
-      setCurrentUser(newUser);
-      localStorage.setItem("chessUser", JSON.stringify(newUser));
-    } catch (error) {
-      console.error("Signup error:", error);
-      throw error;
-    } finally {
+    // Store username in user_metadata
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username },
+      },
+    });
+    if (error) {
       setLoading(false);
+      throw new Error(error.message);
     }
+    setCurrentUser(data.user);
+    setLoading(false);
   };
 
   const logout = async () => {
-    // Clear the user from state and localStorage
+    await supabase.auth.signOut();
     setCurrentUser(null);
-    localStorage.removeItem("chessUser");
   };
 
   const value = {
@@ -109,7 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     login,
     signup,
-    logout
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

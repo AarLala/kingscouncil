@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -49,12 +48,12 @@ const SignUp = () => {
         description: "Your account has been created",
       });
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create account. Please try again."
+        description: error?.message || "Failed to create account. Please try again."
       });
     } finally {
       setIsLoading(false);

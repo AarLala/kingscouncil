@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -38,12 +37,12 @@ const Login = () => {
         description: "You have successfully logged in",
       });
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to log in. Please check your credentials."
+        description: error?.message || "Failed to log in. Please check your credentials."
       });
     } finally {
       setIsLoading(false);
