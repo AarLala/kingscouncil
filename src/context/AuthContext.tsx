@@ -70,6 +70,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
       throw new Error(error.message);
     }
+
+    // Insert into profiles table
+    if (data.user) {
+      await supabase
+        .from("profiles")
+        .insert([{ id: data.user.id, username }]);
+    }
+
     setCurrentUser(data.user);
     setLoading(false);
   };

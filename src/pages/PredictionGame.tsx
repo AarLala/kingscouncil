@@ -8,6 +8,8 @@ import { fenToBoard } from "../utils/chessUtils";
 import { ChessBoard as ChessBoardType } from "../types";
 import { Crown } from "lucide-react";
 import { Chess } from "chess.js";
+import { useAuth } from "../context/AuthContext";
+import { supabase, getChallengeUuidMap } from "../supabaseClient";
 
 const openingMoves = [
   { userMove: "e4", aiMove: "e5" },
@@ -200,6 +202,7 @@ const PredictionGame = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [dragMode, setDragMode] = useState<"user" | "predict">("user");
   const [hintsRemaining, setHintsRemaining] = useState(3);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (!chessObj) {
@@ -212,6 +215,42 @@ const PredictionGame = () => {
   useEffect(() => {
     if (chessObj) setBoard(fenToBoard(chessObj.fen()));
   }, [chessObj]);
+
+  useEffect(() => {
+    if (gameOver && currentUser) {
+      (async () => {
+        try {
+          const uuidMap = await getChallengeUuidMap();
+          const challengeUuid = uuidMap["3"];
+          // Fetch previous best
+          const { data: prev, error: fetchError } = await supabase
+            .from("user_challenge_progress")
+            .select("points")
+            .eq("user_id", currentUser.id)
+            .eq("challenge_id", challengeUuid)
+            .single();
+          if (!prev || score > prev.points) {
+            await supabase
+              .from("user_challenge_progress")
+              .upsert([
+                {
+                  user_id: currentUser.id,
+                  challenge_id: challengeUuid,
+                  points: score,
+                },
+              ], { onConflict: "user_id,challenge_id" });
+            toast({
+              title: "Congratulations!",
+              description: `You earned ${score} points.`,
+              variant: "default"
+            });
+          }
+        } catch (error) {
+          console.error("Failed to update points in Supabase:", error);
+        }
+      })();
+    }
+  }, [gameOver, currentUser, score]);
 
   const handleUserDrop = (toRow, toCol, piece?) => {
     if (dragMode !== "user" || !selectedFrom || !chessObj) return;

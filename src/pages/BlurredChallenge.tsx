@@ -9,6 +9,8 @@ import BrainInfo from "../components/BrainInfo";
 import { fenToBoard, calculateAccuracy, generateRandomPosition } from "../utils/chessUtils";
 import { ChessBoard as ChessBoardType } from "../types";
 import { Timer } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { supabase, getChallengeUuidMap } from "../supabaseClient";
 
 const TIME_LIMIT = 30; // seconds for the challenge
 
@@ -26,6 +28,7 @@ const BlurredChallenge = () => {
   const [showBlurred, setShowBlurred] = useState<boolean>(true);
   const [blurLevel, setBlurLevel] = useState(4);
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (phase === "intro") {
@@ -122,7 +125,7 @@ const BlurredChallenge = () => {
     setUserBoard(newBoard);
   };
 
-  const calculateScore = () => {
+  const calculateScore = async () => {
     const accuracy = calculateAccuracy(board, userBoard);
     let finalScore = accuracy;
     
@@ -134,6 +137,39 @@ const BlurredChallenge = () => {
     }
     
     setScore(finalScore);
+    
+    // Save to Supabase if user is logged in and only if new score is higher
+    if (currentUser) {
+      try {
+        const uuidMap = await getChallengeUuidMap();
+        const challengeUuid = uuidMap["2"];
+        // Fetch previous best
+        const { data: prev, error: fetchError } = await supabase
+          .from("user_challenge_progress")
+          .select("points")
+          .eq("user_id", currentUser.id)
+          .eq("challenge_id", challengeUuid)
+          .single();
+        if (!prev || finalScore > prev.points) {
+          await supabase
+            .from("user_challenge_progress")
+            .upsert([
+              {
+                user_id: currentUser.id,
+                challenge_id: challengeUuid,
+                points: finalScore,
+              },
+            ], { onConflict: "user_id,challenge_id" });
+        }
+      } catch (error) {
+        console.error("Failed to update points in Supabase:", error);
+      }
+    }
+    toast({
+      title: "Congratulations!",
+      description: `You earned ${finalScore} points.`,
+      variant: "default"
+    });
     
     // Update difficulty based on performance
     if (accuracy >= 80) {

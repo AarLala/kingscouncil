@@ -11,6 +11,59 @@ const ACHIEVEMENTS = [
   { id: 2, name: "Memory Master", description: "Score 100+ in Memory Recall" },
   { id: 3, name: "Visionary", description: "Score 100+ in Blurred Vision" },
   { id: 4, name: "Unlocker", description: "Unlock all challenges" },
+  { id: 5, name: "Prediction Pro", description: "Score 100+ in Prediction Game" },
+  { id: 6, name: "Quarter Grandmaster", description: "Reach 250 total points" },
+  { id: 7, name: "Half Grandmaster", description: "Reach 500 total points" },
+  { id: 8, name: "Grandmaster", description: "Reach 1000 total points" },
+  { id: 9, name: "Legend", description: "Reach 2000 total points" },
+];
+
+const CHALLENGES = [
+  {
+    id: 1,
+    title: "Memory Recall",
+    description: "Remember chess positions and recreate them from memory",
+    icon: "♟",
+    difficulty: "Basic",
+    unlock: (_challengePoints, _totalPoints) => true,
+    unlockMsg: "",
+  },
+  {
+    id: 2,
+    title: "Blurred Vision",
+    description: "Test your ability to recognize chess patterns through blurred images",
+    icon: "👁️",
+    difficulty: "Intermediate",
+    unlock: (_challengePoints, _totalPoints) => true,
+    unlockMsg: "",
+  },
+  {
+    id: 3,
+    title: "Prediction Game",
+    description: "Anticipate the computer's next move",
+    icon: "🔮",
+    difficulty: "Advanced",
+    unlock: (challengePoints, _totalPoints) => (challengePoints["1"] >= 100 && challengePoints["2"] >= 100),
+    unlockMsg: "Unlock by scoring 100+ in both Memory Recall and Blurred Vision",
+  },
+  {
+    id: 4,
+    title: "Recall the Game",
+    description: "Remember all the moves played in sequence",
+    icon: "📜",
+    difficulty: "Advanced",
+    unlock: (_challengePoints, totalPoints) => totalPoints >= 300,
+    unlockMsg: "Unlock by reaching 300 total points",
+  },
+  {
+    id: 5,
+    title: "Cognitive Switch",
+    description: "Adapt to changing board orientations and positions",
+    icon: "🔄",
+    difficulty: "Advanced",
+    unlock: () => false,
+    unlockMsg: "Coming Soon!",
+  },
 ];
 
 const Dashboard = () => {
@@ -55,6 +108,11 @@ const Dashboard = () => {
       if (pointsMap["1"] >= 100) userAchievements.push(ACHIEVEMENTS[1]);
       if (pointsMap["2"] >= 100) userAchievements.push(ACHIEVEMENTS[2]);
       if (pointsMap["1"] >= 100 && pointsMap["2"] >= 100) userAchievements.push(ACHIEVEMENTS[3]);
+      if (pointsMap["3"] >= 100) userAchievements.push(ACHIEVEMENTS[4]);
+      if (total >= 250) userAchievements.push(ACHIEVEMENTS[5]);
+      if (total >= 500) userAchievements.push(ACHIEVEMENTS[6]);
+      if (total >= 1000) userAchievements.push(ACHIEVEMENTS[7]);
+      if (total >= 2000) userAchievements.push(ACHIEVEMENTS[8]);
       setAchievements(userAchievements);
       setLoading(false);
     };
@@ -101,97 +159,48 @@ const Dashboard = () => {
           </div>
           <h2 className="text-xl font-bold mb-6">Your Challenges</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            <Link to="/challenges/1">
-              <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
-                <div className="h-40 bg-gradient-to-r from-chess-primary to-chess-secondary flex items-center justify-center">
-                  <div className="text-white text-5xl">♟</div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-lg mb-2">Memory Recall</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Remember chess positions and recreate them from memory
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      Basic
-                    </span>
-                    <Button variant="ghost" size="sm" className="text-chess-primary">
-                      Start
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">Points: {challengePoints["1"] || 0}</div>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link to="/challenges/2">
-              <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
-                <div className="h-40 bg-gradient-to-r from-chess-secondary to-chess-primary flex items-center justify-center">
-                  <div className="text-white text-5xl">👁️</div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-lg mb-2">Blurred Vision</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Test your ability to recognize chess patterns through blurred images
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                      Intermediate
-                    </span>
-                    <Button variant="ghost" size="sm" className="text-chess-primary">
-                      Start
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">Points: {challengePoints["2"] || 0}</div>
-                </CardContent>
-              </Card>
-            </Link>
-            <div>
-              {unlocked3 ? (
-                <Link to="/challenges/3">
+            {CHALLENGES.map((challenge) => {
+              const isUnlocked = typeof challenge.unlock === 'function' ? challenge.unlock(challengePoints, totalPoints) : challenge.unlock;
+              const challengePointsVal = challengePoints[challenge.id] || 0;
+              return isUnlocked ? (
+                <Link to={`/challenges/${challenge.id}`} key={challenge.id}>
                   <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
-                    <div className="h-40 bg-gradient-to-r from-chess-accent to-chess-primary flex items-center justify-center">
-                      <div className="text-white text-5xl">🔮</div>
+                    <div className="h-40 bg-gradient-to-r from-chess-primary to-chess-secondary flex items-center justify-center">
+                      <div className="text-white text-5xl">{challenge.icon}</div>
                     </div>
                     <CardContent className="p-6">
-                      <h3 className="font-bold text-lg mb-2">Prediction Game</h3>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Anticipate the computer's next move
-                      </p>
+                      <h3 className="font-bold text-lg mb-2">{challenge.title}</h3>
+                      <p className="text-sm text-gray-600 mb-4">{challenge.description}</p>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                          Advanced
-                        </span>
-                        <Button variant="ghost" size="sm" className="text-chess-primary">
-                          Start
-                        </Button>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{challenge.difficulty}</span>
+                        <Button variant="ghost" size="sm" className="text-chess-primary">Start</Button>
                       </div>
-                      <div className="text-xs text-gray-500 mt-2">Points: {challengePoints["3"] || 0}</div>
+                      <div className="text-xs text-gray-500 mt-2">Points: {challengePointsVal}</div>
                     </CardContent>
                   </Card>
                 </Link>
               ) : (
-                <Card className="overflow-hidden border-dashed border-2 h-full opacity-60">
+                <Card key={challenge.id} className="overflow-hidden border-dashed border-2 h-full opacity-60 relative">
                   <div className="h-40 bg-gray-100 flex items-center justify-center">
-                    <div className="text-gray-400 text-5xl">🔮</div>
+                    <div className="text-gray-400 text-5xl">{challenge.icon}</div>
                   </div>
                   <CardContent className="p-6">
-                    <h3 className="font-bold text-lg mb-2">Prediction Game</h3>
-                    <p className="text-sm text-gray-400 mb-4">
-                      Anticipate the computer's next move
-                    </p>
+                    <h3 className="font-bold text-lg mb-2">{challenge.title}</h3>
+                    <p className="text-sm text-gray-400 mb-4">{challenge.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
-                        Locked
-                      </span>
-                      <Button variant="ghost" size="sm" disabled className="text-gray-400">
-                        Locked
-                      </Button>
+                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">Locked</span>
+                      <Button variant="ghost" size="sm" disabled className="text-gray-400">Locked</Button>
                     </div>
-                    <div className="text-xs text-gray-500 mt-2">Unlock by scoring 100+ in both Memory Recall and Blurred Vision</div>
+                    <div className="text-xs text-gray-500 mt-2">{challenge.unlockMsg}</div>
                   </CardContent>
+                  {challenge.id === 5 && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                      <span className="text-lg font-bold text-chess-primary">Coming Soon!</span>
+                    </div>
+                  )}
                 </Card>
-              )}
-            </div>
+              );
+            })}
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-gray-100">
@@ -233,7 +242,7 @@ const Dashboard = () => {
                 <p className="text-gray-600 text-sm mb-4">
                   Complete challenges to earn achievements and badges
                 </p>
-                <Link to="/challenges">
+                <Link to="/challenges/1">
                   <Button className="bg-chess-primary hover:bg-chess-secondary">
                     Start a Challenge
                   </Button>

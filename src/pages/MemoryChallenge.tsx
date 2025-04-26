@@ -9,6 +9,8 @@ import BrainInfo from "../components/BrainInfo";
 import { fenToBoard, calculateAccuracy, generateRandomPosition, samplePositions, getSafeFen, getRandomChessPosition } from "../utils/chessUtils";
 import { ChessBoard as ChessBoardType, ChessSquare } from "../types";
 import PieceSelector from "../components/PieceSelector";
+import { useAuth } from "../context/AuthContext";
+import { supabase, getChallengeUuidMap } from "../supabaseClient";
 
 const STUDY_TIME_OPTIONS = [15, 30];
 
@@ -24,6 +26,7 @@ const MemoryChallenge = () => {
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [positionKey, setPositionKey] = useState<number>(0);
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (phase === "intro") {
@@ -119,7 +122,7 @@ const MemoryChallenge = () => {
     setUserBoard(newBoard);
   };
 
-  const calculateScore = () => {
+  const calculateScore = async () => {
     const accuracy = calculateAccuracy(originalBoard, userBoard);
     let finalScore = accuracy;
     
@@ -135,6 +138,38 @@ const MemoryChallenge = () => {
     
     setScore(finalScore);
     setPhase("result");
+    
+    if (currentUser) {
+      try {
+        const uuidMap = await getChallengeUuidMap();
+        const challengeUuid = uuidMap["1"];
+        // Fetch previous best
+        const { data: prev, error: fetchError } = await supabase
+          .from("user_challenge_progress")
+          .select("points")
+          .eq("user_id", currentUser.id)
+          .eq("challenge_id", challengeUuid)
+          .single();
+        if (!prev || finalScore > prev.points) {
+          await supabase
+            .from("user_challenge_progress")
+            .upsert([
+              {
+                user_id: currentUser.id,
+                challenge_id: challengeUuid,
+                points: finalScore,
+              },
+            ], { onConflict: "user_id,challenge_id" });
+        }
+      } catch (error) {
+        console.error("Failed to update points in Supabase:", error);
+      }
+    }
+    toast({
+      title: "Congratulations!",
+      description: `You earned ${finalScore} points.`,
+      variant: "default"
+    });
     
     if (accuracy >= 80) {
       if (difficulty === 'easy') {

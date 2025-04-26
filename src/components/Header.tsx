@@ -18,7 +18,7 @@ const Header = () => {
             <span className="text-white font-bold text-xl">♟</span>
           </div>
           <h1 className="text-xl font-bold bg-gradient-to-r from-chess-primary to-chess-secondary bg-clip-text text-transparent">
-            KinsCouncil
+            KingsCouncil
           </h1>
         </Link>
         <div className="flex items-center gap-4">

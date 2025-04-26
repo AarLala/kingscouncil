@@ -8,6 +8,8 @@ import { useToast } from "@/components/ui/use-toast";
 import ChessBoard from "../components/ChessBoard";
 import { fenToBoard } from "../utils/chessUtils";
 import { Timer } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { supabase, getChallengeUuidMap } from "../supabaseClient";
 
 const initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const files = "abcdefgh";
@@ -200,6 +202,7 @@ function applyMove(board, move) {
 
 const RecallTheGame = () => {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [board, setBoard] = useState(fenToBoard(initialFen));
   const [selected, setSelected] = useState<[number,number]|null>(null);
   const [legalSquares, setLegalSquares] = useState<[number,number][]>([]);
@@ -485,6 +488,34 @@ const RecallTheGame = () => {
     }
   }
 
+  async function upsertProgress() {
+    if (!currentUser) return;
+    try {
+      const uuidMap = await getChallengeUuidMap();
+      const challengeUuid = uuidMap["4"];
+      // Fetch previous best
+      const { data: prev } = await supabase
+        .from("user_challenge_progress")
+        .select("points")
+        .eq("user_id", currentUser.id)
+        .eq("challenge_id", challengeUuid)
+        .single();
+      if (!prev || totalScore > prev.points) {
+        await supabase
+          .from("user_challenge_progress")
+          .upsert([
+            {
+              user_id: currentUser.id,
+              challenge_id: challengeUuid,
+              points: totalScore,
+            },
+          ], { onConflict: "user_id,challenge_id" });
+      }
+    } catch (error) {
+      console.error("Failed to update points in Supabase:", error);
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -619,6 +650,7 @@ const RecallTheGame = () => {
                   </Button>
                 ) : (
                   <div>
+                    {round >= maxRounds && recallScore !== null && upsertProgress()}
                     <div className="mb-4 p-3 bg-chess-primary/10 rounded-lg text-center">
                       <div className="text-lg font-bold text-chess-primary">Final Score: {totalScore}</div>
                       <p className="text-sm text-gray-600 mt-1">You've completed all {maxRounds} rounds!</p>
