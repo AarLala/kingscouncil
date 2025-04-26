@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header";
-import { supabase } from "../supabaseClient";
+import { supabase, getChallengeUuidMap } from "../supabaseClient";
 
 const ACHIEVEMENTS = [
   { id: 1, name: "First Steps", description: "Complete your first challenge" },
@@ -91,12 +91,17 @@ const Dashboard = () => {
         .from("user_challenge_progress")
         .select("challenge_id, points")
         .eq("user_id", currentUser.id);
+      const uuidMap = await getChallengeUuidMap(); // { "1": "uuid1", ... }
+      const uuidToNum = Object.fromEntries(Object.entries(uuidMap).map(([num, uuid]) => [uuid, num]));
       const pointsMap: { [key: string]: number } = {};
       let total = 0;
       if (progressData) {
         for (const row of progressData) {
-          pointsMap[row.challenge_id] = row.points;
-          total += row.points;
+          const numId = uuidToNum[row.challenge_id];
+          if (numId) {
+            pointsMap[numId] = row.points;
+            total += row.points;
+          }
         }
       }
       setChallengePoints(pointsMap);
