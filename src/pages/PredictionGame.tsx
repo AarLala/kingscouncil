@@ -10,6 +10,7 @@ import { Crown } from "lucide-react";
 import { Chess } from "chess.js";
 import { useAuth } from "../context/AuthContext";
 import { supabase, getChallengeUuidMap } from "../supabaseClient";
+import openingBook from '../openingBook.json';
 
 const openingMoves = [
   { userMove: "e4", aiMove: "e5" },
@@ -140,36 +141,39 @@ function evaluateMove(move, chessInstance) {
   return score;
 }
 
+function getBookMove(chessInstance) {
+  // Build the move sequence in SAN
+  const moveHistory = chessInstance.history({ verbose: true }).map(m => m.san);
+  const key = moveHistory.join(' ');
+  const moves = openingBook[key];
+  if (moves && moves.length > 0) {
+    // Pick a random book move
+    const moveSan = moves[Math.floor(Math.random() * moves.length)];
+    // Find the move object in legal moves
+    const legal = chessInstance.moves({ verbose: true }).find(m => m.san === moveSan);
+    return legal || null;
+  }
+  return null;
+}
+
 function makeAIMove(chessInstance) {
   if (!chessInstance) return null;
-  
+  // Try opening book first (for first 8 moves)
+  if (chessInstance.history().length < 8) {
+    const bookMove = getBookMove(chessInstance);
+    if (bookMove) return bookMove;
+  }
+  // ...existing evaluation logic...
   const moves = chessInstance.moves({ verbose: true });
   if (!moves || moves.length === 0) return null;
-
-  // Early game: use opening book
-  if (chessInstance.history().length < 2) {
-    const lastMove = chessInstance.history().slice(-1)[0];
-    const opening = openingMoves.find(m => m.userMove === lastMove);
-    if (opening) {
-      const response = moves.find(m => m.san === opening.aiMove);
-      if (response) return response;
-    }
-  }
-
-  // Evaluate all possible moves
   const evaluatedMoves = moves
     .map(move => ({
       move,
       score: evaluateMove(move, chessInstance)
     }))
     .filter(m => m.score !== undefined && !isNaN(m.score));
-
   if (evaluatedMoves.length === 0) return moves[0]; // Fallback to first legal move
-
-  // Sort moves by score
   evaluatedMoves.sort((a, b) => b.score - a.score);
-
-  // Add some randomness but bias towards better moves
   const topMoves = evaluatedMoves.slice(0, Math.min(3, evaluatedMoves.length));
   const randomIndex = Math.floor(Math.random() * topMoves.length);
   return topMoves[randomIndex].move;
