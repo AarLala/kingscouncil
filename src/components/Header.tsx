@@ -22,6 +22,12 @@ const Header = () => {
           </h1>
         </Link>
         <div className="flex items-center gap-4">
+          <Link to="/">
+            <Button variant="ghost">Home</Button>
+          </Link>
+          <Link to="/about">
+            <Button variant="ghost">About</Button>
+          </Link>
           {currentUser && (
             <Button variant="outline" onClick={() => navigate("/dashboard")}>Dashboard</Button>
           )}
