@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
@@ -27,7 +26,7 @@ const Index = () => {
                 
                 <div className="flex flex-wrap gap-4 pt-4">
                   {currentUser ? (
-                    <Link to="/challenges">
+                    <Link to="/dashboard">
                       <Button className="bg-chess-primary hover:bg-chess-secondary text-white px-8 py-6 text-lg h-auto">
                         Start Challenges
                       </Button>
@@ -150,7 +149,7 @@ const Index = () => {
             
             <div className="flex justify-center">
               {currentUser ? (
-                <Link to="/challenges">
+                <Link to="/dashboard">
                   <Button className="bg-chess-primary hover:bg-chess-secondary text-white px-8 py-3 text-lg">
                     Start Now
                   </Button>
@@ -174,7 +173,7 @@ const Index = () => {
               <div className="w-8 h-8 rounded-full bg-chess-primary flex items-center justify-center">
                 <span className="text-white font-bold text-sm">♟</span>
               </div>
-              <span className="font-bold text-gray-800">MindChessLab</span>
+              <span className="font-bold text-gray-800">KinsCouncil</span>
             </div>
             
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
@@ -187,7 +186,7 @@ const Index = () => {
             </div>
             
             <div>
-              <p className="text-xs text-gray-500">© 2025 MindChessLab. All rights reserved.</p>
+              <p className="text-xs text-gray-500">© 2025 KinsCouncil. All rights reserved.</p>
             </div>
           </div>
         </div>

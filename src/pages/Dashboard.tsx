@@ -1,69 +1,105 @@
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header";
+import { supabase } from "../supabaseClient";
+
+const ACHIEVEMENTS = [
+  { id: 1, name: "First Steps", description: "Complete your first challenge" },
+  { id: 2, name: "Memory Master", description: "Score 100+ in Memory Recall" },
+  { id: 3, name: "Visionary", description: "Score 100+ in Blurred Vision" },
+  { id: 4, name: "Unlocker", description: "Unlock all challenges" },
+];
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
-  
-  useEffect(() => {
-    // Preload chess piece images for better performance
-    const pieces = ["p", "r", "n", "b", "q", "k"];
-    const colors = ["w", "b"];
-    
-    pieces.forEach(piece => {
-      colors.forEach(color => {
-        const img = new Image();
-        img.src = `/chess/${color}${piece}.svg`;
-      });
-    });
-  }, []);
+  const [profile, setProfile] = useState<any>(null);
+  const [challengePoints, setChallengePoints] = useState<{ [key: string]: number }>({});
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!currentUser) {
+  useEffect(() => {
+    if (!currentUser) return;
+    const fetchData = async () => {
+      setLoading(true);
+      // Fetch profile (username)
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", currentUser.id)
+        .single();
+      setProfile(profileData);
+
+      // Fetch challenge points
+      const { data: progressData } = await supabase
+        .from("user_challenge_progress")
+        .select("challenge_id, points")
+        .eq("user_id", currentUser.id);
+      const pointsMap: { [key: string]: number } = {};
+      let total = 0;
+      if (progressData) {
+        for (const row of progressData) {
+          pointsMap[row.challenge_id] = row.points;
+          total += row.points;
+        }
+      }
+      setChallengePoints(pointsMap);
+      setTotalPoints(total);
+
+      // Fetch achievements (for demo, calculate from points)
+      const userAchievements: any[] = [];
+      if (progressData && progressData.length > 0) userAchievements.push(ACHIEVEMENTS[0]);
+      if (pointsMap["1"] >= 100) userAchievements.push(ACHIEVEMENTS[1]);
+      if (pointsMap["2"] >= 100) userAchievements.push(ACHIEVEMENTS[2]);
+      if (pointsMap["1"] >= 100 && pointsMap["2"] >= 100) userAchievements.push(ACHIEVEMENTS[3]);
+      setAchievements(userAchievements);
+      setLoading(false);
+    };
+    fetchData();
+  }, [currentUser]);
+
+  if (!currentUser || loading) {
     return <div>Loading...</div>;
   }
+
+  // Challenge unlock logic
+  const unlocked3 = challengePoints["1"] >= 100 && challengePoints["2"] >= 100;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold">Welcome, {currentUser.username}!</h1>
+                <h1 className="text-2xl font-bold">Welcome, {profile?.username || currentUser.email}!</h1>
                 <p className="text-gray-600">Track your progress and start new challenges</p>
               </div>
-              
               <div className="flex flex-wrap gap-3">
                 <div className="py-2 px-4 bg-chess-primary/10 rounded-full flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-chess-primary"></div>
-                  <span className="font-medium text-chess-primary">{currentUser.points} points</span>
+                  <span className="font-medium text-chess-primary">{totalPoints} points</span>
                 </div>
-                
                 <div className="py-2 px-4 bg-chess-accent/10 rounded-full flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-chess-accent"></div>
                   <span className="font-medium text-chess-accent">
-                    {currentUser.completedChallenges?.length || 0} completed
+                    {Object.keys(challengePoints).length} completed
                   </span>
                 </div>
-                
                 <div className="py-2 px-4 bg-chess-success/10 rounded-full flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-chess-success"></div>
                   <span className="font-medium text-chess-success">
-                    {currentUser.achievements?.length || 0} achievements
+                    {achievements.length} achievements
                   </span>
                 </div>
               </div>
             </div>
           </div>
-          
           <h2 className="text-xl font-bold mb-6">Your Challenges</h2>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <Link to="/challenges/1">
               <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
@@ -83,10 +119,10 @@ const Dashboard = () => {
                       Start
                     </Button>
                   </div>
+                  <div className="text-xs text-gray-500 mt-2">Points: {challengePoints["1"] || 0}</div>
                 </CardContent>
               </Card>
             </Link>
-            
             <Link to="/challenges/2">
               <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
                 <div className="h-40 bg-gradient-to-r from-chess-secondary to-chess-primary flex items-center justify-center">
@@ -105,39 +141,65 @@ const Dashboard = () => {
                       Start
                     </Button>
                   </div>
+                  <div className="text-xs text-gray-500 mt-2">Points: {challengePoints["2"] || 0}</div>
                 </CardContent>
               </Card>
             </Link>
-            
-            <Card className="overflow-hidden border-dashed border-2 h-full">
-              <div className="h-40 bg-gray-100 flex items-center justify-center">
-                <div className="text-gray-400 text-5xl">🔮</div>
-              </div>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-2">Prediction Game</h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  Anticipate the computer's next move
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
-                    Coming Soon
-                  </span>
-                  <Button variant="ghost" size="sm" disabled className="text-gray-400">
-                    Locked
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div>
+              {unlocked3 ? (
+                <Link to="/challenges/3">
+                  <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
+                    <div className="h-40 bg-gradient-to-r from-chess-accent to-chess-primary flex items-center justify-center">
+                      <div className="text-white text-5xl">🔮</div>
+                    </div>
+                    <CardContent className="p-6">
+                      <h3 className="font-bold text-lg mb-2">Prediction Game</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Anticipate the computer's next move
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          Advanced
+                        </span>
+                        <Button variant="ghost" size="sm" className="text-chess-primary">
+                          Start
+                        </Button>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2">Points: {challengePoints["3"] || 0}</div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ) : (
+                <Card className="overflow-hidden border-dashed border-2 h-full opacity-60">
+                  <div className="h-40 bg-gray-100 flex items-center justify-center">
+                    <div className="text-gray-400 text-5xl">🔮</div>
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-lg mb-2">Prediction Game</h3>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Anticipate the computer's next move
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
+                        Locked
+                      </span>
+                      <Button variant="ghost" size="sm" disabled className="text-gray-400">
+                        Locked
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">Unlock by scoring 100+ in both Memory Recall and Blurred Vision</div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
-          
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold">Recent Achievements</h2>
             </div>
-            
-            {currentUser.achievements && currentUser.achievements.length > 0 ? (
+            {achievements.length > 0 ? (
               <div className="divide-y divide-gray-100">
-                {currentUser.achievements.map((achievement) => (
+                {achievements.map((achievement) => (
                   <div 
                     key={achievement.id} 
                     className="p-4 flex items-center justify-between hover:bg-gray-50"
@@ -154,7 +216,8 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="text-xs text-gray-500">
-                      {new Date(achievement.dateUnlocked).toLocaleDateString()}
+                      {/* For demo, just show today's date */}
+                      {new Date().toLocaleDateString()}
                     </div>
                   </div>
                 ))}
