@@ -142,14 +142,20 @@ function evaluateMove(move, chessInstance) {
 }
 
 function getBookMove(chessInstance) {
-  // Build the move sequence in SAN
-  const moveHistory = chessInstance.history({ verbose: true }).map(m => m.san);
-  const key = moveHistory.join(' ');
+  const moveHistory = chessInstance.history({ verbose: true });
+  let key = '';
+  if (moveHistory.length === 0) {
+    key = '1.'; // Start of the game
+  } else {
+    for (let i = 0; i < moveHistory.length; i++) {
+      if (i % 2 === 0) key += `${(i / 2) + 1}. `;
+      key += moveHistory[i].san + ' ';
+    }
+    key = key.trim();
+  }
   const moves = openingBook[key];
   if (moves && moves.length > 0) {
-    // Pick a random book move
     const moveSan = moves[Math.floor(Math.random() * moves.length)];
-    // Find the move object in legal moves
     const legal = chessInstance.moves({ verbose: true }).find(m => m.san === moveSan);
     return legal || null;
   }
@@ -189,6 +195,8 @@ function moveToSAN(move, chessInstance) {
   }
 }
 
+const MAX_MOVES_PER_ROUND = 4;
+
 const PredictionGame = () => {
   const { toast } = useToast();
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: User moves, 2: Predict AI, 3: Show result
@@ -207,6 +215,7 @@ const PredictionGame = () => {
   const [dragMode, setDragMode] = useState<"user" | "predict">("user");
   const [hintsRemaining, setHintsRemaining] = useState(3);
   const { currentUser } = useAuth();
+  const [moveCount, setMoveCount] = useState(0);
 
   useEffect(() => {
     if (!chessObj) {
@@ -323,10 +332,10 @@ const PredictionGame = () => {
       
       if (correct) {
         setResult("correct");
-        setScore(s => s + 1);
+        setScore(s => s + 5);
         toast({
           title: "Correct Prediction!",
-          description: `+1 point. The AI played ${aiMoveObj.san}.`,
+          description: `+5 points. The AI played ${aiMoveObj.san}.`,
         });
       } else {
         setResult("wrong");
@@ -351,15 +360,12 @@ const PredictionGame = () => {
       setStep(3);
       setDragMode("user");
       setSelectedFrom(null);
-      if (round >= 5) {
+      setMoveCount(c => c + 1);
+      if (moveCount + 1 >= MAX_MOVES_PER_ROUND) {
         setGameOver(true);
         toast({
-          title: "Game Over!",
-          description: `Final Score: ${score} out of 5`,
-        });
-      } else {
-        toast({
-          description: "Click 'Next Move' to continue",
+          title: "Round Complete!",
+          description: `You reached the maximum of ${MAX_MOVES_PER_ROUND} moves. Final Score: ${score + (correct ? 5 : 0)}`,
         });
       }
     } catch (error) {
@@ -402,12 +408,13 @@ const PredictionGame = () => {
     setAIMove(null);
     setResult(null);
     setStep(1);
-    setRound(r => r + 1);
+    setMoveCount(0);
     setErrorMsg("");
     setSelectedFrom(null);
     setDragMode("user");
 
     if (round < 5) {
+      setRound(round + 1);
       const c = new Chess();
       setChessObj(c);
       setBoard(fenToBoard(c.fen()));
@@ -435,6 +442,7 @@ const PredictionGame = () => {
     setErrorMsg("");
     setSelectedFrom(null);
     setDragMode("user");
+    setMoveCount(0);
     toast({
       title: "New Game Started",
       description: "Round 1/5 - Make your move",
@@ -521,7 +529,8 @@ const PredictionGame = () => {
                     <ol className="list-decimal ml-4 text-gray-600 text-sm">
                       <li>Click on your piece, then click where you want to move it</li>
                       <li>Then, predict the AI's reply by clicking the piece and destination</li>
-                      <li>Get a point for every correct prediction!</li>
+                      <li>Each round is a maximum of 4 moves</li>
+                      <li>Each correct prediction is worth 5 points</li>
                       <li>Play 5 rounds to complete a game</li>
                       <li>Use hints wisely - you have {hintsRemaining} remaining</li>
                     </ol>

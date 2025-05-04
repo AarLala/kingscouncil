@@ -224,7 +224,7 @@ const RecallTheGame = () => {
       const [row, col] = selected;
       const piece = board[row][col].piece;
       const color = board[row][col].color;
-      if (!piece || color !== (isWhiteTurn ? "white":"black")) {
+      if (!piece || color !== (isWhiteTurn ? playerColor : (playerColor === "white" ? "black" : "white"))) {
         setLegalSquares([]);
         return;
       }
@@ -255,7 +255,7 @@ const RecallTheGame = () => {
     } else {
       setLegalSquares([]);
     }
-  }, [selected, board, isWhiteTurn]);
+  }, [selected, board, isWhiteTurn, playerColor]);
 
   function handleSquareClick(row: number, col: number) {
     if (gamePhase !== "play") return;
@@ -264,7 +264,7 @@ const RecallTheGame = () => {
     if (!selected) {
       const square = board[row][col];
       // Only allow selecting own pieces
-      if (square.piece && square.color === (isWhiteTurn ? "white" : "black")) {
+      if (square.piece && square.color === (isWhiteTurn ? playerColor : (playerColor === "white" ? "black" : "white"))) {
         setSelected([row, col]);
         let moves: [number, number][] = [];
         switch(square.piece) {
@@ -310,11 +310,12 @@ const RecallTheGame = () => {
         if (moveCount + 1 >= 6) {
           setTimeout(() => {
             setRecallOpen(true);
-          }, 500);
+          }, 1000);
         } else {
           // AI's turn
           setTimeout(() => {
-            const aiMoves = getAllLegalMoves(newBoard, "black");
+            const aiColor = playerColor === "white" ? "black" : "white";
+            const aiMoves = getAllLegalMoves(newBoard, aiColor);
             if (aiMoves.length > 0) {
               const aiMove = aiMoves[Math.floor(Math.random() * aiMoves.length)];
               const aiBoard = applyMove(newBoard, aiMove);
@@ -331,7 +332,7 @@ const RecallTheGame = () => {
               if (moveCount + 2 >= 6) {
                 setTimeout(() => {
                   setRecallOpen(true);
-                }, 500);
+                }, 1000); // Delay recall popup so player sees AI move
               }
             }
           }, 500);
@@ -362,7 +363,7 @@ const RecallTheGame = () => {
       gamePhase === "play" &&
       moveCount > 0
     ) {
-      const aiColor = isWhiteTurn ? "white" : "black";
+      const aiColor = playerColor === "white" ? "black" : "white";
 
       const timeoutId = setTimeout(() => {
         if (
@@ -381,6 +382,13 @@ const RecallTheGame = () => {
 
             setIsWhiteTurn((prev) => !prev);
             setMoveCount((c) => c + 1);
+
+            // If this move triggers recall, delay the popup
+            if ((moveCount + 1) % 6 === 0) {
+              setTimeout(() => {
+                setRecallOpen(true);
+              }, 1000); // Delay recall popup so player sees AI move
+            }
           }
         }
       }, 800);
@@ -550,12 +558,14 @@ const RecallTheGame = () => {
                   <Button 
                     onClick={() => startGame(maxRounds, "white")}
                     className="flex-1 bg-white text-black border border-gray-300 hover:bg-gray-100"
+                    disabled={!maxRounds}
                   >
                     Play as White
                   </Button>
                   <Button 
                     onClick={() => startGame(maxRounds, "black")}
                     className="flex-1 bg-gray-800 text-white hover:bg-black"
+                    disabled={!maxRounds}
                   >
                     Play as Black
                   </Button>
