@@ -86,7 +86,7 @@ const App: React.FC = () => {
             <a href="" className="hover:text-blue-400 transition duration-300">
               Home
             </a>
-            <a href="\Login.tsx" className="hover:text-blue-400 transition duration-300">
+            <a href="/login" className="hover:text-blue-400 transition duration-300">
               Challenges
             </a>
             <a href="#" className="hover:text-blue-400 transition duration-300">
@@ -95,10 +95,10 @@ const App: React.FC = () => {
             <a href="#" className="hover:text-blue-400 transition duration-300">
               Book
             </a>
-            <a href="\MyStory.tsx" className="hover:text-blue-400 transition duration-300">
+            <a href="/mystory" className="hover:text-blue-400 transition duration-300">
               My Story
             </a>
-            <a href="\About.tsx" className="hover:text-blue-400 transition duration-300">
+            <a href="/about" className="hover:text-blue-400 transition duration-300">
               About
             </a>
           </nav>
