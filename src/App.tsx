@@ -22,6 +22,8 @@ import RecallTheGame from "./pages/RecallTheGame";
 import CognitiveSwitch from "./pages/CognitiveSwitch";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import MyStory from "./pages/Mystory"; // Adjust the path if necessary
+
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,7 @@ const App = () => {
                   <Dashboard />
                 </ProtectedRoute>
               } />
+              <Route path="/mystory" element={<MyStory />} />
               <Route path="/challenges" element={
                 <ProtectedRoute>
                   <Challenges />

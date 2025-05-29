@@ -3,24 +3,132 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KingsCouncil</title>
-    <meta name="description" content="KingsCouncil: Chess Labs to enhance your chess skill and memory" />
+    <title>King's Council | Chess Coaching and Free Learning</title>
+    <meta name="description" content="King's Council: Chess Labs to enhance your chess skill and memory" />
     <meta name="author" content="Aarav" />
 
-    <meta property="og:title" content="KingsCouncil" />
-    <meta property="og:description" content="Created by Aarav" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="King's Council | Chess Coaching" />
+    <meta property="og:description" content="Master the Chessboard, Master the Mind - Chess coaching and community outreach" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="" />
+    <meta property="og:image" content="https://static.wixstatic.com/media/a624e3_80b6e53c262c4103b1289f4dd31f0b4a~mv2.png" />
 
-    <meta name="twitter:card" content="" />
-    <meta name="twitter:site" content="" />
-    <meta name="twitter:image" content="" />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@KingsCouncilChess" />
+    <meta name="twitter:image" content="https://static.wixstatic.com/media/a624e3_80b6e53c262c4103b1289f4dd31f0b4a~mv2.png" />
+
+    <!-- Preload important resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- CSS Resources -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Global Styles -->
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes scrollUp {
+        0% {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .animate-fadeInUp {
+        animation: fadeInUp 1s ease-out forwards;
+      }
+      .animate-fadeIn {
+        animation: fadeIn 1s ease-out forwards;
+      }
+      .animate-scrollUp {
+        animation: scrollUp 1s ease-out forwards;
+      }
+      /* Custom fonts */
+      .font-serif-custom {
+        font-family: 'Playfair Display', serif;
+      }
+      .font-body {
+        font-family: 'Inter', sans-serif;
+      }
+      .font-metrics {
+        font-family: 'Montserrat', sans-serif;
+      }
+      /* Back to top button */
+      #backToTop {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background-color: #1a237e;
+        color: #ffd700;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        display: none;
+        z-index: 50;
+      }
+      .text-gold {
+        color: #ffd700;
+      }
+    </style>
   </head>
 
-  <body>
+  <body class="font-body antialiased bg-gradient-to-b from-black via-gray-900 to-black text-white">
     <div id="root"></div>
+    
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    
+    <!-- Particles.js (if needed) -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <!-- Main application script -->
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Inline script for elements that exist outside React root -->
+    <script>
+      // Back to Top Button (for elements outside React root)
+      document.addEventListener('DOMContentLoaded', () => {
+        const backToTopButton = document.getElementById('backToTop');
+        if (backToTopButton) {
+          window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+              backToTopButton.style.display = 'block';
+            } else {
+              backToTopButton.style.display = 'none';
+            }
+          });
+          
+          backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+      });
+    </script>
   </body>
 </html>
