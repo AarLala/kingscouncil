@@ -149,14 +149,14 @@ const App: React.FC = () => {
           </h1>
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
             <a
-              href="\Login"
+              href="/login"
               className="bg-blue-400 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold opacity-0 animate-fadeIn"
               style={{ animationDelay: '1s' }}
             >
               Start Playing
             </a>
             <a
-              href="\About"
+              href="/about"
               className="bg-blue-400 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold opacity-0 animate-fadeIn"
               style={{ animationDelay: '1.2s' }}
             >
