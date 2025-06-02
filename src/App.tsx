@@ -23,6 +23,7 @@ import CognitiveSwitch from "./pages/CognitiveSwitch";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import MyStory from "./pages/Mystory"; // Adjust the path if necessary
+import Timeline from "./pages/Timeline";
 
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => {
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/timeline" element={<Timeline />} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />

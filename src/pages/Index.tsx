@@ -89,7 +89,7 @@ const App: React.FC = () => {
             <a href="/login" className="hover:text-blue-400 transition duration-300">
               Challenges
             </a>
-            <a href="#" className="hover:text-blue-400 transition duration-300">
+            <a href="\Timeline" className="hover:text-blue-400 transition duration-300">
               Community/Outreach
             </a>
             <a href="#" className="hover:text-blue-400 transition duration-300">
@@ -174,14 +174,14 @@ const App: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-6xl font-metrics text-gold animate-scrollUp" data-target="1006">
-                1006
+              <div className="text-6xl font-metrics text-gold animate-scrollUp" data-target="300">
+                300
               </div>
               <p className="mt-4 text-xl">Families Empowered</p>
             </div>
             <div>
-              <div className="text-6xl font-metrics text-gold animate-scrollUp" data-target="5204">
-                5204
+              <div className="text-6xl font-metrics text-gold animate-scrollUp" data-target="1432">
+                1432
               </div>
               <p className="mt-4 text-xl">Chess Games</p>
             </div>
@@ -278,7 +278,7 @@ const App: React.FC = () => {
             />
           </div>
           <a 
-            href="https://www.kingscouncils.org/community-outreach" 
+            href="\Timeline" 
             className="bg-blue-400 hover:bg-blue-600 text-white px-6 py-3 rounded-full inline-block font-semibold"
           >
             View Community Work
@@ -291,20 +291,20 @@ const App: React.FC = () => {
           <h2 className="text-5xl font-bold text-center mb-12 font-serif-custom">Achievement Timeline</h2>
           <div className="relative border-l-2 border-gray-600 ml-4">
             <div className="mb-8 ml-6">
-              <p className="text-lg font-semibold">2018</p>
+              <p className="text-lg font-semibold">2023</p>
               <p className="mt-2">Founded with a vision to empower local communities through chess.</p>
             </div>
             <div className="mb-8 ml-6">
-              <p className="text-lg font-semibold">2020</p>
+              <p className="text-lg font-semibold">2024</p>
               <p className="mt-2">Expanded outreach programs and chess coaching sessions across multiple regions.</p>
             </div>
             <div className="mb-8 ml-6">
-              <p className="text-lg font-semibold">2022</p>
-              <p className="mt-2">Engaged over 1000 families with innovative community programs.</p>
+              <p className="text-lg font-semibold">2024</p>
+              <p className="mt-2">Engaged over 5000 families with innovative community programs.</p>
             </div>
             <div className="mb-8 ml-6">
-              <p className="text-lg font-semibold">2024</p>
-              <p className="mt-2">Hosted international chess tournaments and launched online learning modules.</p>
+              <p className="text-lg font-semibold">2025</p>
+              <p className="mt-2">Created this WebApp to allow all chess players to learn</p>
             </div>
           </div>
         </div>
@@ -364,7 +364,7 @@ const App: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6">
             <a href="\Index" className="hover:text-blue-400 transition duration-300">Home</a>
             <a href="\Login" className="hover:text-blue-400 transition duration-300">Challenges</a>
-            <a href="#" className="hover:text-blue-400 transition duration-300">Community/Outreach</a>
+            <a href="\Timeline" className="hover:text-blue-400 transition duration-300">Community/Outreach</a>
             <a href="#" className="hover:text-blue-400 transition duration-300">Book</a>
             <a href="\MyStory" className="hover:text-blue-400 transition duration-300">My Story</a>
             <a href="/About" className="hover:text-blue-400 transition duration-300">About</a>

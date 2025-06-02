@@ -10,9 +10,9 @@ const About = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
-            <h1 className="text-3xl font-bold mb-6">About KingsCouncil</h1>
+            <h1 className="text-3xl font-bold mb-6 text-black" >About KingsCouncil</h1>
             
-            <div className="prose max-w-none">
+            <div className="prose max-w-none text-black">
               <p>
                 KingsCouncil combines the strategic elements of chess with cognitive science
                 to create engaging brain training exercises for all ages, with a special focus on neurodivergent
@@ -34,7 +34,7 @@ const About = () => {
               </ul>
               <h2 className="text-xl font-semibold mt-8 mb-4">Contact Us</h2>
               <p>
-                Have questions or feedback? Email us at <a href="mailto:support@kinscouncil.com" className="text-chess-primary underline">support@kinscouncil.com</a>.
+                Have questions or feedback? Email us at <a href="mailto:aaravhlala@gmail.com" className="text-chess-primary underline">aaravhlala@gmail.com</a>.
               </p>
             </div>
           </div>
