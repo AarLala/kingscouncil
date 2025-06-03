@@ -17,9 +17,6 @@ const MyStory = () => {
                 </h1>
 
                 <p className="text-lg text-gray-600">
-                  Hi there! My name is Aarav Lala, and I'm a junior at the Illinois Mathematics and Science Academy. Outside of academics, you'll probably find me playing spikeball with friends or diving into a good video game—anything that keeps me thinking and moving.
-                </p>
-                <p className="text-lg text-gray-600">
                   I’ve been playing chess since 3rd grade, and over the years, it’s grown into much more than just a game. From grinding through tournaments to studying classics like the King and pawn checkmate, chess has taught me patience, resilience, and how to learn through failure. One of my proudest moments was becoming Alabama State Co-Champion at the Alabama Dual Rated State Tournament, but honestly, the real growth came from the challenges—and the incredible people I met along the way.
                 </p>
                 <p className="text-lg text-gray-600">
@@ -28,7 +25,6 @@ const MyStory = () => {
                 <ul className="list-disc pl-6 text-lg text-gray-600">
                   <li>4× AIME Qualifier</li>
                   <li>USACO Gold Division</li>
-                  <li>Alabama Dual Rated State Tournament Co-Champion</li>
                   <li>National Chess Competitor</li>
                 </ul>
                 <p className="text-lg text-gray-600">
@@ -37,19 +33,6 @@ const MyStory = () => {
                 <p className="text-lg text-gray-600">
                   For me, this isn’t just about winning. It’s about making chess more accessible and welcoming. It’s about helping others find their love for the game, at their own pace.
                 </p>
-              </div>
-
-              <div className="lg:w-1/2 relative">
-                <div className="relative w-full aspect-square max-w-md mx-auto flex items-center justify-center">
-                  <div className="absolute inset-0 bg-chess-primary/20 rounded-full animate-pulse-light"></div>
-                  {/* Add your image here */}
-                  <img
-                    src="aarav'swin.png"
-                    alt="Story Image"
-                    className="relative z-10 rounded-2xl shadow-xl object-cover w-full h-full"
-                    style={{ objectPosition: "center" }}
-                  />
-                </div>
               </div>
             </div>
           </div>
