@@ -11,7 +11,7 @@ const Header = () => {
     await logout();
     navigate("/");
   };
-  return <header className="bg-white shadow-sm py-3 px-4">
+  return <header className="bg-black shadow-sm py-3 px-4">
       <div className="container mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-4">
           <div className="w-10 h-10 rounded-full bg-chess-primary flex items-center justify-center">
@@ -28,9 +28,12 @@ const Header = () => {
           <Link to="/about">
             <Button variant="ghost">About</Button>
           </Link>
-          {currentUser && (
-            <Button variant="outline" onClick={() => navigate("/dashboard")}>Dashboard</Button>
-          )}
+{currentUser && (
+  <Link to="/dashboard">
+    <Button variant="ghost">Dashboard</Button>
+  </Link>
+)}
+
           {currentUser ? (
             <Button variant="ghost" onClick={handleLogout}>Logout</Button>
           ) : (

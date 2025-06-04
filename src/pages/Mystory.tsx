@@ -40,7 +40,7 @@ const MyStory = () => {
 
         <section className="py-20 px-4">
           <div className="container mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold mb-6">Thanks for Reading!</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-600">Thanks for Reading!</h2>
             <p className="text-lg text-gray-600 mb-10">
               {/* A final closing thought or call to action */}
               I hope my story inspires you to start your own chess journey. If you have any questions or would like to share your own story, feel free to reach out!
@@ -64,7 +64,7 @@ const MyStory = () => {
               <div className="w-8 h-8 rounded-full bg-chess-primary flex items-center justify-center">
                 <span className="text-white font-bold text-sm">♟</span>
               </div>
-              <span className="font-bold text-gray-800">KinsCouncil</span>
+              <span className="font-bold text-gray-800">KingsCouncil</span>
             </div>
 
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">

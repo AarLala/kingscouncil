@@ -10,23 +10,33 @@ let challengeUuidMap: Record<string, string> | null = null;
 
 export async function getChallengeUuidMap() {
   if (challengeUuidMap) return challengeUuidMap;
+
   const { data, error } = await supabase
-    .from('challenges')
-    .select('id, name');
+    .from("challenges")
+    .select("id, name");
+
   if (error) throw error;
-  // Map challenge numbers to UUIDs based on name order
-  // You may want to adjust this logic if you add/remove challenges
+
   const nameToNumber: Record<string, string> = {
-    'Memory Recall': '1',
-    'Blurred Vision': '2',
-    'Prediction Game': '3',
-    'Recall the Game': '4',
-    'Cognitive Switch': '5',
+    "memory recall": "1",
+    "blurred vision": "2",
+    "prediction game": "3",
+    "recall the game": "4",
+    "cognitive switch": "5",
   };
+
   challengeUuidMap = {};
+
   for (const row of data) {
-    const num = nameToNumber[row.name];
-    if (num) challengeUuidMap[num] = row.id;
+    const cleanedName = row.name?.trim().toLowerCase();
+    const num = nameToNumber[cleanedName];
+
+    if (num) {
+      challengeUuidMap[num] = row.id;
+    } else {
+      console.warn("Unmapped challenge name in DB:", row.name);
+    }
   }
+
   return challengeUuidMap;
-} 
+}

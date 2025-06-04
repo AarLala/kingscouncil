@@ -237,7 +237,7 @@ const BlurredChallenge = () => {
         <div className="max-w-6xl mx-auto">
           {phase === "intro" && (
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8 text-center">
-              <h1 className="text-2xl font-bold mb-3">Blurred Vision Challenge</h1>
+              <h1 className="text-2xl font-bold mb-3 text-gray-600">Blurred Vision Challenge</h1>
               <p className="text-gray-600 max-w-2xl mx-auto mb-8">
                 Test your visual processing ability by identifying chess pieces through a blurred lens,
                 then recreating the position accurately.
@@ -252,14 +252,14 @@ const BlurredChallenge = () => {
                   ></div>
                 </div>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <p className="text-lg font-medium bg-white/80 p-3 rounded-lg shadow-sm">
+                  <p className="text-lg font-medium bg-white/80 p-3 rounded-lg shadow-sm text-gray-600">
                     Can you identify the pieces?
                   </p>
                 </div>
               </div>
               
               <div className="mb-8">
-                <h2 className="font-medium mb-3">Current Difficulty: <span className="text-chess-primary">{difficulty}</span></h2>
+                <h2 className="font-medium mb-3 text-gray-600">Current Difficulty: <span className="text-chess-primary">{difficulty}</span></h2>
                 <p className="text-sm text-gray-500 mb-4">
                   {difficulty === 'easy' ? 'Lower blur level and simpler positions to start!' :
                    difficulty === 'medium' ? 'Increased blur and more complex positions!' :

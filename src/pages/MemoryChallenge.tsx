@@ -122,55 +122,94 @@ const MemoryChallenge = () => {
     setUserBoard(newBoard);
   };
 
-  const calculateScore = async () => {
-    const accuracy = calculateAccuracy(originalBoard, userBoard);
-    let finalScore = accuracy;
-    
-    if (selectedTime === 15) {
-      finalScore += 15;
-    }
-    
-    if (difficulty === 'medium') {
-      finalScore += 10;
-    } else if (difficulty === 'hard') {
-      finalScore += 20;
-    }
-    
-    setScore(finalScore);
-    setPhase("result");
-    
-    if (currentUser) {
-      try {
-        const uuidMap = await getChallengeUuidMap();
-        const challengeUuid = uuidMap["1"];
-        // Fetch previous best
-        const { data: prev, error: fetchError } = await supabase
-          .from("user_challenge_progress")
-          .select("points")
-          .eq("user_id", currentUser.id)
-          .eq("challenge_id", challengeUuid)
-          .single();
-        if (!prev || finalScore > prev.points) {
-          await supabase
-            .from("user_challenge_progress")
-            .upsert([
-              {
-                user_id: currentUser.id,
-                challenge_id: challengeUuid,
-                points: finalScore,
-              },
-            ], { onConflict: "user_id,challenge_id" });
-        }
-      } catch (error) {
-        console.error("Failed to update points in Supabase:", error);
+const calculateScore = async () => {
+  const accuracy = calculateAccuracy(originalBoard, userBoard);
+  let finalScore = accuracy;
+
+  if (selectedTime === 15) finalScore += 15;
+  if (difficulty === 'medium') finalScore += 10;
+  else if (difficulty === 'hard') finalScore += 20;
+
+  setScore(finalScore);
+  setPhase("result");
+
+  if (currentUser) {
+    try {
+      const uuidMap = await getChallengeUuidMap();
+      const challengeUuid = uuidMap["1"];
+
+      if (!challengeUuid) {
+        console.error("Challenge UUID not found for challenge ID 1");
+        return;
       }
+
+      console.log("🔢 Final score:", finalScore);
+console.log("🙋 User:", currentUser);
+console.log("🗺️ UUID Map:", uuidMap);
+console.log("📊 Challenge ID:", uuidMap["1"]);
+
+const { data: prev, error: fetchError } = await supabase
+  .from("user_challenge_progress")
+  .select("*")
+  .eq("user_id", currentUser.id)
+  .eq("challenge_id", uuidMap["1"])
+  .maybeSingle();
+
+console.log("📥 Existing progress (prev):", prev);
+console.log("⚠️ Fetch error (if any):", fetchError);
+
+// Then log after upsert:
+const { error: upsertError } = await supabase
+  .from("user_challenge_progress")
+  .upsert([
+    {
+      user_id: currentUser.id,
+      challenge_id: challengeUuid,
+      points: finalScore,
+      completed: true, // if you want to track completion
     }
-    toast({
-      title: "Congratulations!",
-      description: `You earned ${finalScore} points.`,
-      variant: "default"
-    });
-    
+  ], { onConflict: "user_id,challenge_id" });
+
+
+
+      if (fetchError && fetchError.code !== "PGRST116") {
+        // Not "row not found" — an actual error
+        console.error("Error fetching previous score:", fetchError);
+        return;
+      }
+
+      if (!prev || finalScore > prev.points) {
+        const { error: upsertError } = await supabase
+          .from("user_challenge_progress")
+          .upsert(
+            [{
+              user_id: currentUser.id,
+              challenge_id: challengeUuid,
+              points: finalScore,
+            }],
+            { onConflict: "user_id,challenge_id" }
+          );
+
+        if (upsertError) {
+          console.error("Upsert error:", upsertError);
+        } else {
+          console.log("Score successfully saved or updated!");
+        }
+      } else {
+        console.log("Score not updated because it wasn’t better than previous.");
+      }
+    } catch (err) {
+      console.error("Failed to update points in Supabase:", err);
+    }
+  } else {
+    console.warn("User is not signed in. Cannot save score.");
+  }
+
+  toast({
+    title: "Congratulations!",
+    description: `You earned ${finalScore} points.`,
+    variant: "default"
+  });
     if (accuracy >= 80) {
       if (difficulty === 'easy') {
         setDifficulty('medium');
@@ -231,20 +270,21 @@ const MemoryChallenge = () => {
         <div className="max-w-6xl mx-auto">
           {phase === "intro" && (
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8 text-center">
-              <h1 className="text-2xl font-bold mb-3">Memory Recall Challenge</h1>
+              <h1 className="text-2xl font-bold mb-3 text-gray-600 ">Memory Recall Challenge</h1>
               <p className="text-gray-600 max-w-2xl mx-auto mb-8">
                 Test your visual memory by studying a chess position, then recreating it from memory.
                 This exercise trains your working memory and spatial recognition.
               </p>
               
               <div className="mb-8">
-                <h2 className="font-medium mb-3">Current Difficulty: <span className="text-chess-primary">{difficulty}</span></h2>
+<h2 className="text-gray-800 font-medium mb-3">
+Current Difficulty: <span className="text-chess-primary">{difficulty}</span></h2>
                 <p className="text-sm text-gray-500 mb-4">
                   {difficulty === 'easy' ? 'Master the basics to unlock more challenging positions!' :
                    difficulty === 'medium' ? 'Good progress! Can you handle even more complex positions?' :
                    'You\'re at the highest difficulty level. Test your limits!'}
                 </p>
-                <h2 className="font-medium mb-3">Select study time:</h2>
+                <h2 className=" text-gray-800 font-medium mb-3 font-medium mb-3">Select study time and play:</h2>
                 <div className="flex justify-center gap-4">
                   {STUDY_TIME_OPTIONS.map(time => (
                     <Button 
@@ -271,7 +311,7 @@ const MemoryChallenge = () => {
           {phase === "study" && (
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
               <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold">Study the Position</h1>
+                <h1 className="text-2xl font-bold text-gray-600">Study the Position</h1>
                 <p className="text-gray-600 mb-4">
                   Memorize the position of all pieces. The board will clear when the timer ends.
                 </p>
